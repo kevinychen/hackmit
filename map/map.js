@@ -1,3 +1,4 @@
+var fb = new Firebase("https://waypal.firebaseio.com");
 var directionsDisplay;
 var directionsService = new google.maps.DirectionsService();
 var map;
@@ -12,6 +13,22 @@ function initialize() {
   map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
   directionsDisplay.setMap(map);
 }
+
+// callback(err, data);
+function getWaypoints(tripId, callback) {
+  fb.child(tripId).once('value', function(data) {
+    var waypoints = data.val();
+    if (!waypoints) {
+      callback("Error obtaining waypoints! Does this trip exist?", "");
+      return;
+    }
+    callback(false, waypoints);
+  });
+}
+
+getWaypoints('trip1', function(err, data) {
+  console.log(data);
+});
 
 function calcRoute() {
   var start = document.getElementById('start').value;
