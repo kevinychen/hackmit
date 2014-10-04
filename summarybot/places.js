@@ -2,6 +2,7 @@ var express = require('express');
 var http = require('http');
 var request = require('request');
 var exec = require('child_process').exec;
+var path = require('path');
 
 var port = 8101;
 var maxPOIs = 3;
@@ -9,6 +10,7 @@ var numSentences = 3;
 var app = express();
 app.use(express.bodyParser());
 app.use(express.logger('dev'));
+app.use(express.static(path.join(__dirname, 'pois')));
 
 /*
  * {location: '42.35904,-71.095174'}

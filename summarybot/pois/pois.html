@@ -1,0 +1,45 @@
+<!--
+Requires git clone https://github.com/kripken/speak.js.git -> speakjs/
+-->
+<html>
+    <head>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+        <script src="speakjs/speakClient.js"></script>
+        <script src="speakjs/speakGenerator.js"></script>
+    </head>
+    <body>
+        <div id="poll">
+            <button onclick="run()">Get POIs!</button>
+        </div>
+        <div id="content">
+            <ul id="pois">
+            </ul>
+        </div>
+        <div id="audio"></div>
+    </body>
+    <script>
+        function getPOIs(position) {
+            var location = position.coords.latitude + ',' + position.coords.longitude;
+            $.get('http://simple.mit.edu:8101/getPOIs?location=' + location, function(data) {
+                if (!data.error) {
+                    var POIs = data.POIs;
+                    var html = '';
+                    for (var i = 0; i < POIs.length; i++) {
+                        var POI = POIs[i];
+                        html += '<li>' + (i + 1) + '. ' + POI.name + ': ' + POI.summary + '</li>';
+                    }
+                    if (POIs[0]) {
+                        speak(POIs[0].summary, {noWorker: true});
+                    }
+                    $('#pois').html(html);
+                }
+            });
+        };
+
+        function run() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(getPOIs);
+            }
+        }
+    </script>
+</html>
