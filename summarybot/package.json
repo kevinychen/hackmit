@@ -1,0 +1,12 @@
+{
+  "name": "Places",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "start": "node places.js"
+  },
+  "dependencies": {
+    "request": "*",
+    "express": "3.4.0"
+  }
+}
