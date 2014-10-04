@@ -4,13 +4,15 @@ var request = require('request');
 var exec = require('child_process').exec;
 
 var port = 8101;
+var maxPOIs = 3;
+var numSentences = 3;
 var app = express();
 app.use(express.bodyParser());
 app.use(express.logger('dev'));
 
 /*
  * {location: '42.35904,-71.095174'}
- *  -> {summary: 'MIT is a university...'}
+ *  -> {error: false, POIs: [name: 'MIT', location: '42.35904,-71.095174', summary: 'MIT is a university...']}
  */
 app.get('/getPOIs', function(req, res) {
     var location = req.query.location;
@@ -20,19 +22,36 @@ app.get('/getPOIs', function(req, res) {
                 + location + '&radius=' + radius
     }, function(err, data) {
         if (err || !data || !data.body) {
-            console.log('Fail');
-            return;
+            return console.log('Fail');
         }
         var results = JSON.parse(data.body).results;
+        results = results.slice(0, maxPOIs);
         console.log('Found ' + results.length + ' results.');
-        var name = results[0].name.replace(/\W/g, ' ');
-        exec('python places.py "' + name + '" 3', function(err, stdout, stderr) {
-            if (err || stderr) {
-                res.json({err: err || stderr});
-            } else {
-                res.json({summary: stdout});
-            }
-        });
+        if (results.length === 0) {
+            return res.json({error: 'No results'});
+        }
+
+        var POIs = new Array(results.length);
+        var counter = results.length;
+        var error = false;
+        var getSummary = function(name, location, i) {
+            exec('python places.py "' + name + '" ' + numSentences, function(err, stdout, stderr) {
+                if (err || stderr) {
+                    error |= err || stderr;
+                } else {
+                    POIs[i] = {name: name, location: location, summary: stdout};
+                }
+                if (--counter == 0) {
+                    return res.json({error: error, POIs: POIs});
+                }
+            });
+        };
+
+        for (var i = 0; i < maxPOIs; i++) {
+            var name = results[i].name.replace(/\W/g, ' ');
+            var location = results[i].geometry.location;
+            getSummary(name, location, i);
+        }
     });
 });
 
