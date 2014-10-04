@@ -46,3 +46,11 @@ function calcRoute() {
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
+
+$(document).ready(function() {
+  $("#start, #end").keyup(function(event) {
+    if (event.keyCode == 13) {
+      calcRoute();
+    }
+  });
+});
