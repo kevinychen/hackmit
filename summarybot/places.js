@@ -18,13 +18,14 @@ app.get('/getPOIs', function(req, res) {
     var location = req.query.location;
     var radius = req.query.radius || 100;
     request.get({
-        url: 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?key=AIzaSyDjPSTLIvxabT87GCJM9nHyi0QaYwvBEtQ&location='
-                + location + '&radius=' + radius
+      url: 'https://maps.googleapis.com/maps/api/place/textsearch/json?sensor=true&key=AIzaSyBXWoukdbjcmeuj22mjf66_l4a6ikGTmIk&location='
+                + location + '&radius=' + radius + '&query=attractions'
     }, function(err, data) {
         if (err || !data || !data.body) {
             return console.log('Fail');
         }
         var results = JSON.parse(data.body).results;
+//        console.log(results);
         results = results.slice(0, maxPOIs);
         console.log('Found ' + results.length + ' results.');
         if (results.length === 0) {
@@ -39,7 +40,7 @@ app.get('/getPOIs', function(req, res) {
                 if (err || stderr) {
                     error |= err || stderr;
                 } else {
-                    POIs[i] = {name: name, location: location, summary: stdout};
+                    POIs[i] = {name: name, location: location, summary: stdout.trim()};
                 }
                 if (--counter == 0) {
                     return res.json({error: error, POIs: POIs});
