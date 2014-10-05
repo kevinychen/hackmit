@@ -85,6 +85,10 @@ public class POIFragment extends ListFragment {
 	
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
+		pickWaypoint(position);
+	}
+	
+	public void pickWaypoint(int position) {
 		System.out.println("position: " + position);
 		if (myFirebaseRef == null || trip == null) {
 			return;
