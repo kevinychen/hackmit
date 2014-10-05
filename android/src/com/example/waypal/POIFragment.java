@@ -1,7 +1,18 @@
 package com.example.waypal;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Map;
+
+import android.app.ListFragment;
+import android.content.Context;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.waypal.Trip.POI;
 import com.firebase.client.DataSnapshot;
@@ -9,21 +20,15 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
-import android.app.ListFragment;
-import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-
 public class POIFragment extends ListFragment {
 	
 	ListView waypoints;
 	ArrayList<String> data = new ArrayList<String>();
 	ArrayAdapter<String>  mAdapter;
 	boolean viewCreated = false;
+	HashSet<String> alreadySeen = new HashSet<String>();
 	Firebase myFirebaseRef;
+	Trip trip;
 	
 	public POIFragment() {
 	}
@@ -50,7 +55,14 @@ public class POIFragment extends ListFragment {
 		this.myFirebaseRef = firebaseRef;
 	}
 	
+	public void setTrip(Trip trip) {
+		this.trip = trip;
+	}
+	
 	private void addWaypoint(final POI poi) {
+		if (myFirebaseRef == null || trip == null) {
+			return;
+		}
 		myFirebaseRef.child("waypoints").addListenerForSingleValueEvent(new ValueEventListener() {
 		    @Override
 		    public void onDataChange(DataSnapshot snapshot) {
@@ -70,31 +82,48 @@ public class POIFragment extends ListFragment {
 	
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
-		if (myFirebaseRef == null) {
-			return;
-		}
 		System.out.println("position: " + position);
-//		removeItem(position);
+		Context context = getActivity();
+		String name = data.get(position);
+        Toast.makeText(context, "You've added a new waypoint: " + name, Toast.LENGTH_LONG).show();
+        removeItem(position);
 	}
 	
 	public void removeItem(int i) {
+		if (myFirebaseRef == null || trip == null) {
+			return;
+		}
+		alreadySeen.add(data.get(i));
 		data.remove(i);
 		mAdapter.notifyDataSetChanged();
 	}
 	
 	public void setItem(int i, String value) {
+		if (myFirebaseRef == null || trip == null) {
+			return;
+		}
+		if (alreadySeen.contains(value)) {
+			return;
+		}
 		data.set(i, value);
 		mAdapter.notifyDataSetChanged();
 	}
 
 	public void setListItems(String[] items) {
+		if (myFirebaseRef == null || trip == null) {
+			return;
+		}
 		if (!viewCreated) {
 			return;
 		}
 
 		mAdapter.clear();
 		for (int i = 0; i < items.length; i++) {
-		        mAdapter.add(items[i]);
+
+			if (alreadySeen.contains(items[i])) {
+				continue;
+			}
+			mAdapter.add(items[i]);
 		}
 		mAdapter.notifyDataSetChanged();	
 	}
