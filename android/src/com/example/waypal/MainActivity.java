@@ -46,6 +46,7 @@ public class MainActivity extends Activity {
     TextToSpeech ttobj;
 	Trip trip;
     Location mCurrentLocation;
+    boolean tripInitialized = false;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -99,6 +100,35 @@ public class MainActivity extends Activity {
         String locationProvider = mlocManager.getBestProvider(criteria, true);
         mlocManager.requestLocationUpdates(locationProvider, 0, 0, mlocListener);
 	}
+	
+	private void initializeWaypoint() {
+		Map<String, Object> waypoints = new HashMap<String, Object>();
+		Map<String, Object> waypointWrapper = new HashMap<String, Object>();
+		
+		waypoints.put("waypoint1", new Waypoint("current location", mCurrentLocation));
+		waypoints.put("waypoint2", new Waypoint("destination", mCurrentLocation));
+		myFirebaseRef.child(trip.id).setValue("Do you have data? You'll love Firebase.");
+		tripInitialized = true;
+	}
+
+	private void addWaypoint() {
+		myFirebaseRef.child(trip.id).addListenerForSingleValueEvent(new ValueEventListener() {
+		    @Override
+		    public void onDataChange(DataSnapshot snapshot) {
+		    	Map<String, Object> newPost = (Map<String, Object>) snapshot.getValue();
+		myFirebaseRef.child("message").setValue("Do you have data? You'll love Firebase.");	
+
+		    }
+		    @Override
+		    public void onCancelled(FirebaseError firebaseError) {
+		    }
+		});
+	}
+	
+	
+	private void removeWaypoint() {
+		myFirebaseRef.child("message").setValue("Do you have data? You'll love Firebase.");
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -120,11 +150,7 @@ public class MainActivity extends Activity {
         criteria.setPowerRequirement(Criteria.POWER_LOW);   
         String locationProvider = mlocManager.getBestProvider(criteria, true);
         mlocManager.requestLocationUpdates(locationProvider, 0, 0, mlocListener);
-//		TextView textView = new TextView(this);
-//		textView.setTextSize(40);
-//		textView.setText(message);
-		
-		//setContentView(textView);
+
 		return true;
 	}
 
