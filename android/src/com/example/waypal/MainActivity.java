@@ -1,11 +1,11 @@
 package com.example.waypal;
 
 
-import android.os.Bundle;
-import android.support.v4.app.FragmentActivity;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -17,7 +17,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.location.Address;
@@ -26,7 +25,9 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
+import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -64,7 +65,6 @@ public class MainActivity extends FragmentActivity {
 		}
 
 		this.trip = new Trip();
-		this.dest = getDestination();
 
 		// Setup Firebase listener
 		Firebase.setAndroidContext(this);
@@ -76,17 +76,19 @@ public class MainActivity extends FragmentActivity {
 
 			  @Override
 			  public void onDataChange(DataSnapshot snapshot) {
-				  Map<String, Object> waypoints = (Map<String, Object>)snapshot.getValue();
-				  if (waypoints == null) {
+				  Map<String, Object> data = (Map<String, Object>)snapshot.getValue();
+				  if (data == null) {
 					  return;
 				  }
 
-				  Map<String, Waypoint> waypointMap = new HashMap<String, Waypoint>();
+				  List<Waypoint> waypoints = new ArrayList<Waypoint>();
 				  
-				  for(String key : waypoints.keySet()) {
-					  Map<String, String> waypoint = (Map<String, String>)waypoints.get(key);
-					  waypointMap.put(waypoint.get("name"), new Waypoint(waypoint.get("name"), waypoint.get("lat"), waypoint.get("lng")));
+				  for(String key : data.keySet()) {
+					  Map<String, String> waypoint = (Map<String, String>) data.get(key);
+					  waypoints.add(new Waypoint(waypoint.get("name"), waypoint.get("lat"), waypoint.get("lng")));
 				  }
+				  
+				  computeRoute(waypoints);
 			  }
 
 			  @Override public void onCancelled(FirebaseError error) { }
@@ -125,8 +127,10 @@ public class MainActivity extends FragmentActivity {
 
 		Map<String, Object> waypoints = new HashMap<String, Object>();
 		
-		waypoints.put("waypoint1", new Waypoint("current location", mCurrentLocation));
-		waypoints.put("waypoint2", new Waypoint("destination", getDestination()));
+		waypoints.put("waypoint0", new Waypoint("current location", mCurrentLocation));
+		waypoints.put("waypoint9", new Waypoint("destination", getDestination()));
+		this.start = new LatLng(mCurrentLocation.getLatitude(), mCurrentLocation.getLongitude());
+		this.dest = getDestination();
 
 		myFirebaseRef.child("waypoints").setValue(waypoints);
 		tripInitialized = true;
@@ -139,7 +143,7 @@ public class MainActivity extends FragmentActivity {
 		    	Map<String, Object> waypoints = (Map<String, Object>) snapshot.getValue();
 
 		    	int len = waypoints.size();
-		    	waypoints.put("waypoint" + (len + 1), new Waypoint(poi));
+		    	waypoints.put("waypoint" + (len - 1), new Waypoint(poi));
 		    	
 		    	myFirebaseRef.child("waypoints").setValue(waypoints);
 		    }
@@ -183,6 +187,21 @@ public class MainActivity extends FragmentActivity {
 		Intent intent = getIntent();
 		Address dest = intent.getParcelableExtra(HomeActivity.DESTINATION);
 		return new LatLng(dest.getLatitude(), dest.getLongitude());
+	}
+	
+	public void computeRoute(List<Waypoint> waypoints) {
+		HttpClient httpClient = new DefaultHttpClient();
+		String url = "http://maps.googleapis.com/maps/api/directions/json?origin="
+				+ start.latitude + "," + start.longitude + "&destination=" + dest.latitude
+				+ dest.longitude;
+		if (waypoints != null && waypoints.size() > 0) {
+		    url += "&waypoints=";
+		    int i = 0;
+		    for (i = 0; i < waypoints.size() - 1; i++)
+		    	url += waypoints.get(i).lat + "," + waypoints.get(i).lng + "|";
+		    url += waypoints.get(i).lat + "," + waypoints.get(i).lng;
+		}
+		System.out.println(url);
 	}
 
 	@Override

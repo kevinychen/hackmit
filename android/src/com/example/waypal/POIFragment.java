@@ -1,17 +1,17 @@
 package com.example.waypal;
 
-import android.app.Fragment;
+import android.app.ListFragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-public class POIFragment extends Fragment {
+public class POIFragment extends ListFragment {
 	
-	public static final int QUERY_TIMER = 60000;
-
-	ListView wayPointsList;
+	ListView waypoints;
+	String[] data = new String[] {"one", "two", "three"};
 	
 	public POIFragment() {
 	}
@@ -19,10 +19,11 @@ public class POIFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
-		System.out.println("hello world");
-		View rootView = inflater.inflate(R.layout.fragment_poi,
-				container, false);
-		System.out.println(rootView);
+		
+		ArrayAdapter<String> adapter = new ArrayAdapter<String>(inflater.getContext(),
+				android.R.layout.simple_list_item_1, data);
+		setListAdapter(adapter);
+		View rootView = super.onCreateView(inflater, container, savedInstanceState);
 
 		return rootView;
 	}
