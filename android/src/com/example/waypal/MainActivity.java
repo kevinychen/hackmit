@@ -79,6 +79,8 @@ public class MainActivity extends FragmentActivity {
 		Map<String, String> tripInfo = new HashMap<String, String>();
 		tripInfo.put("id", trip.id);
 		myFirebaseRef = new Firebase("https://waypal.firebaseio.com/").child(trip.id);
+		// Give a reference to the child fragment
+		poiFragment.setFirebase(myFirebaseRef);
 		myFirebaseRef.setValue(tripInfo);
 		myFirebaseRef.child("waypoints").addValueEventListener(new ValueEventListener() {
 

@@ -1,6 +1,13 @@
 package com.example.waypal;
 
 import java.util.ArrayList;
+import java.util.Map;
+
+import com.example.waypal.Trip.POI;
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 
 import android.app.ListFragment;
 import android.os.Bundle;
@@ -16,6 +23,7 @@ public class POIFragment extends ListFragment {
 	ArrayList<String> data = new ArrayList<String>();
 	ArrayAdapter<String>  mAdapter;
 	boolean viewCreated = false;
+	Firebase myFirebaseRef;
 	
 	public POIFragment() {
 	}
@@ -33,26 +41,61 @@ public class POIFragment extends ListFragment {
 		View rootView = super.onCreateView(inflater, container, savedInstanceState);
 		viewCreated = true;
 		
+		
 		setListItems(new String[]{"testing", "testing123"});
 
 		return rootView;
 	}
 	
-	@Override
-	public void onListItemClick(ListView l, View v, int position, long id) {
-
+	public void setFirebase(Firebase firebaseRef) {
+		this.myFirebaseRef = firebaseRef;
 	}
 	
+	private void addWaypoint(final POI poi) {
+		myFirebaseRef.child("waypoints").addListenerForSingleValueEvent(new ValueEventListener() {
+		    @Override
+		    public void onDataChange(DataSnapshot snapshot) {
+		    	Map<String, Object> waypoints = (Map<String, Object>) snapshot.getValue();
+
+		    	int len = waypoints.size();
+		    	waypoints.put("waypoint" + (len - 1), new Waypoint(poi));
+		    	
+		    	myFirebaseRef.child("waypoints").setValue(waypoints);
+		    }
+
+		    @Override
+		    public void onCancelled(FirebaseError firebaseError) {
+		    }
+		});
+	}
+	
+	@Override
+	public void onListItemClick(ListView l, View v, int position, long id) {
+		if (myFirebaseRef == null) {
+			return;
+		}
+		System.out.println("position: " + position);
+		removeItem(position);
+	}
+	
+	public void removeItem(int i) {
+		data.remove(i);
+		mAdapter.notifyDataSetChanged();
+	}
+	
+	public void setItem(int i, String value) {
+		data.set(i, value);
+		mAdapter.notifyDataSetChanged();
+	}
+
 	public void setListItems(String[] items) {
 		if (!viewCreated) {
 			return;
 		}
 
 		mAdapter.clear();
-		data.clear();
 		for (int i = 0; i < items.length; i++) {
 		        mAdapter.add(items[i]);
-		        data.add(items[i]);
 		}
 		mAdapter.notifyDataSetChanged();	
 	}
