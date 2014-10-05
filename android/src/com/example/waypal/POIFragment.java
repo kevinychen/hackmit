@@ -97,6 +97,7 @@ public class POIFragment extends ListFragment {
 		}
 		String name = data.get(position);
         removeItem(position);
+        alreadySeen.add(name);
         for(POI poi : trip.pois){
         	if (poi.name.equals(name)) {
         		addWaypoint(poi);
