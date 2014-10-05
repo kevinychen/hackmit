@@ -71,7 +71,6 @@ public class MainActivity extends FragmentActivity {
 			setUpMap();
 		}
 
-		poiFragment.setListItems(new String[]{"TOAST", "ANNA", "BURRITO"});
 		this.trip = new Trip();
 
 		// Setup Firebase listener

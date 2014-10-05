@@ -38,11 +38,13 @@ public class POIFragment extends ListFragment {
 			Bundle savedInstanceState) {
 		
 		
+		/*
 		data.add("SUPER COOL");
 		data.add("SUPER SWEET");
 		data.add("SUPER SWET");
 		data.add("SUPER SWT");
 		data.add("SUPER ST");
+		*/
 		mAdapter = new ArrayAdapter<String>(inflater.getContext(),
 				android.R.layout.simple_list_item_1, data);
 		setListAdapter(mAdapter);
@@ -105,7 +107,7 @@ public class POIFragment extends ListFragment {
 	}
 	
 	public void removeItem(int i) {
-		if (myFirebaseRef == null || trip == null) {
+		if (myFirebaseRef == null || trip == null || i >= data.size()) {
 			return;
 		}
 		alreadySeen.add(data.get(i));
