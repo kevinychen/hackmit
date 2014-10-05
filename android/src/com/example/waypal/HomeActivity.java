@@ -12,6 +12,11 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
+
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Context;
@@ -37,6 +42,7 @@ public class HomeActivity extends Activity {
 	
     TextToSpeech ttobj;
     Location mCurrentLocation;
+	Firebase myFirebaseRef;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +74,20 @@ public class HomeActivity extends Activity {
         criteria.setPowerRequirement(Criteria.POWER_LOW);   
         String locationProvider = mlocManager.getBestProvider(criteria, true);
         mlocManager.requestLocationUpdates(locationProvider, 0, 0, mlocListener);
+        
+        // Setup firebase
+		Firebase.setAndroidContext(this);
+		myFirebaseRef = new Firebase("https://waypal.firebaseio.com/");
+		myFirebaseRef.child("trip1").addValueEventListener(new ValueEventListener() {
+
+			  @Override
+			  public void onDataChange(DataSnapshot snapshot) {
+			    System.out.println(snapshot.getValue());  //prints "Do you have data? You'll love Firebase."
+			  }
+
+			  @Override public void onCancelled(FirebaseError error) { }
+
+		});
 	}
 
 	@Override
