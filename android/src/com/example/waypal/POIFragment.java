@@ -5,11 +5,12 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ListView;
 
 public class POIFragment extends Fragment {
 	
-	public static final int QUERY_TIMER = 60000;
-
+	ListView wayPointsList;
+	
 	public POIFragment() {
 	}
 
