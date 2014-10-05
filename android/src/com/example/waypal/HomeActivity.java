@@ -1,18 +1,28 @@
 package com.example.waypal;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.Toast;
 
 public class HomeActivity extends Activity {
 	
-	public final static String EXTRA_MESSAGE = "com.example.waypal.MESSAGE";
+	public final static String DESTINATION = "com.example.waypal.DESTINATION";
+	
+	Geocoder geocoder;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +31,7 @@ public class HomeActivity extends Activity {
 		if (savedInstanceState == null) {
 			getFragmentManager().beginTransaction()
 					.add(R.id.container, new PlaceholderFragment()).commit();
+			geocoder = new Geocoder(this, Locale.US);
 		}
 	}
 
@@ -45,17 +56,21 @@ public class HomeActivity extends Activity {
 	
 	public void goToHome(View view) {
 		Intent intent = new Intent(this, MainActivity.class);
-		startActivity(intent);
+		EditText editText = (EditText) findViewById(R.id.destination_message);
+		String dest = editText.getText().toString();
+		try {
+			List<Address> results = geocoder.getFromLocationName(dest, 1);
+			if (results.size() < 1) {
+				Toast.makeText(this, "Could not find " + dest, Toast.LENGTH_SHORT).show();
+				return;
+			}
+     		intent.putExtra(DESTINATION, results.get(0));
+     		startActivity(intent);
+		} catch (IOException e) {
+			e.printStackTrace();
+			Toast.makeText(this, "Connection error.", Toast.LENGTH_SHORT).show();
+		}
 	}
-	
-	/*
-	public void sendMessage(View view) {
-		Intent intent = new Intent(this, DisplayMessageActivity.class);
-		EditText editText = (EditText) findViewById(R.id.edit_message);
-		String message = editText.getText().toString();
-		intent.putExtra(EXTRA_MESSAGE, message);
-		startActivity(intent);
-	}*/
 
 	/**
 	 * A placeholder fragment containing a simple view.

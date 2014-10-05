@@ -1,5 +1,7 @@
 package com.example.waypal;
 
+import com.google.android.gms.maps.model.LatLng;
+
 public class Waypoint {
 	public String lat;
 	public String lng;
@@ -8,8 +10,22 @@ public class Waypoint {
 	
 	public Waypoint(String name, android.location.Location loc) {
 		this.name = name;
-		this.lat = String.format("%d", loc.getLatitude());
-		this.lng = String.format("%d", loc.getLongitude());
+		this.lat = "" + loc.getLatitude();
+		this.lng = "" + loc.getLongitude();
+		this.stopover = "true";
+	}
+	
+	public Waypoint(String name, LatLng latlng) {
+		this.name = name;
+		this.lat = "" + latlng.latitude;
+		this.lng = "" + latlng.longitude;
+		this.stopover = "true";
+	}
+	
+	public Waypoint(POIobj o) {
+		this.name = o.name;
+		this.lat = o.lat;
+		this.lng = o.lng;
 		this.stopover = "true";
 	}
 	

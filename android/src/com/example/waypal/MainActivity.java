@@ -16,6 +16,8 @@ import org.json.JSONTokener;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.location.Address;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -26,7 +28,6 @@ import android.speech.tts.TextToSpeech;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
@@ -35,10 +36,10 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.LatLng;
 
 public class MainActivity extends Activity {
 
-	ListView listView;
 	MapFragment mapFragment;
 	POIFragment poiFragment;
 	GoogleMap map;
@@ -47,6 +48,7 @@ public class MainActivity extends Activity {
 	Trip trip;
     Location mCurrentLocation;
     boolean tripInitialized = false;
+    LatLng start, dest;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -55,10 +57,11 @@ public class MainActivity extends Activity {
 		if (savedInstanceState == null) {
 			mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
 			poiFragment = (POIFragment) getFragmentManager().findFragmentById(R.id.pois);
-			System.out.println(mapFragment);
+			setUpMap();
 		}
 
 		this.trip = new Trip();
+		this.dest = getDestination();
 
 		// Setup Firebase listener
 		Firebase.setAndroidContext(this);
@@ -101,24 +104,32 @@ public class MainActivity extends Activity {
         mlocManager.requestLocationUpdates(locationProvider, 0, 0, mlocListener);
 	}
 	
-	private void initializeWaypoint() {
+	private void initializeWaypoints() {
+		if (tripInitialized) {
+			return;
+		}
+
 		Map<String, Object> waypoints = new HashMap<String, Object>();
-		Map<String, Object> waypointWrapper = new HashMap<String, Object>();
 		
 		waypoints.put("waypoint1", new Waypoint("current location", mCurrentLocation));
-		waypoints.put("waypoint2", new Waypoint("destination", mCurrentLocation));
-		myFirebaseRef.child(trip.id).setValue("Do you have data? You'll love Firebase.");
+		waypoints.put("waypoint2", new Waypoint("destination", getDestination()));
+
+		myFirebaseRef.child(trip.id).child("waypoints").setValue(waypoints);
 		tripInitialized = true;
 	}
 
-	private void addWaypoint() {
-		myFirebaseRef.child(trip.id).addListenerForSingleValueEvent(new ValueEventListener() {
+	private void addWaypoint(final POIobj poi) {
+		myFirebaseRef.child(trip.id).child("waypoints").addListenerForSingleValueEvent(new ValueEventListener() {
 		    @Override
 		    public void onDataChange(DataSnapshot snapshot) {
-		    	Map<String, Object> newPost = (Map<String, Object>) snapshot.getValue();
-		myFirebaseRef.child("message").setValue("Do you have data? You'll love Firebase.");	
+		    	Map<String, Object> waypoints = (Map<String, Object>) snapshot.getValue();
 
+		    	int len = waypoints.size();
+		    	waypoints.put("waypoint" + (len + 1), new Waypoint(poi));
+		    	
+		    	myFirebaseRef.child(trip.id).child("waypoints").setValue(waypoints);
 		    }
+
 		    @Override
 		    public void onCancelled(FirebaseError firebaseError) {
 		    }
@@ -126,17 +137,45 @@ public class MainActivity extends Activity {
 	}
 	
 	
-	private void removeWaypoint() {
-		myFirebaseRef.child("message").setValue("Do you have data? You'll love Firebase.");
+	private void removeWaypoint(final String name) {
+		myFirebaseRef.child(trip.id).child("waypoints").addListenerForSingleValueEvent(new ValueEventListener() {
+		    @Override
+		    public void onDataChange(DataSnapshot snapshot) {
+		    	Map<String, Object> waypoints = (Map<String, Object>) snapshot.getValue();
+		    	
+		    	if (waypoints.containsKey(name)) {
+		    		waypoints.remove(name);
+		    	}
+		    	myFirebaseRef.child(trip.id).child("waypoints").setValue(waypoints);
+		    }
+
+		    @Override
+		    public void onCancelled(FirebaseError firebaseError) {
+		    }
+		});
+	}
+
+	private void setUpMap() {
+	    // Do a null check to confirm that we have not already instantiated the map.
+	    if (map == null) {
+	        map = mapFragment.getMap();
+	        // Check if we were successful in obtaining the map.
+	        if (map != null) {
+	            // The Map is verified. It is now safe to manipulate the map.
+	        }
+	    }
+	}
+		
+	private LatLng getDestination() {
+		Intent intent = getIntent();
+		Address dest = intent.getParcelableExtra(HomeActivity.DESTINATION);
+		return new LatLng(dest.getLatitude(), dest.getLongitude());
 	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.home, menu);
-//		Intent intent = getIntent();
-//		String message = intent.getStringExtra(HomeActivity.EXTRA_MESSAGE);
-//		
         /* Use the LocationManager class to obtain GPS locations */
         LocationManager mlocManager = (LocationManager) 
                 getSystemService(Context.LOCATION_SERVICE);
@@ -150,7 +189,6 @@ public class MainActivity extends Activity {
         criteria.setPowerRequirement(Criteria.POWER_LOW);   
         String locationProvider = mlocManager.getBestProvider(criteria, true);
         mlocManager.requestLocationUpdates(locationProvider, 0, 0, mlocListener);
-
 		return true;
 	}
 
@@ -192,6 +230,10 @@ public class MainActivity extends Activity {
         @Override
         public void onLocationChanged(Location location) {
             mCurrentLocation = location;
+            
+            // Idempotent function
+            initializeWaypoints();
+
             double latitude = location.getLatitude();
             double longitude = location.getLongitude();
             String Text = latitude + " " + longitude;
