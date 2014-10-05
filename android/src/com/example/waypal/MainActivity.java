@@ -8,6 +8,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -30,7 +32,7 @@ import android.speech.tts.TextToSpeech;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
+import android.widget.ListView;
 import android.widget.Toast;
 
 import com.example.waypal.Trip.POI;
@@ -44,6 +46,9 @@ import com.google.android.gms.maps.model.LatLng;
 
 public class MainActivity extends FragmentActivity {
 
+	public static final int QUERY_TIMER = 60000;
+
+	ListView listView;
 	MapFragment mapFragment;
 	POIFragment poiFragment;
 	GoogleMap map;
@@ -53,6 +58,8 @@ public class MainActivity extends FragmentActivity {
     Location mCurrentLocation;
     boolean tripInitialized = false;
     LatLng start, dest;
+    Timer timer;  // triggers a call to getPOIs every once in a while
+    Thread speaker;  // thread that keeps talking
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +107,7 @@ public class MainActivity extends FragmentActivity {
             @Override
             public void onInit(int status) {
                 if(status != TextToSpeech.ERROR){
-                    ttobj.setLanguage(Locale.UK);
+                    ttobj.setLanguage(Locale.ENGLISH);
                 }
             }
         });
@@ -119,6 +126,11 @@ public class MainActivity extends FragmentActivity {
         String locationProvider = mlocManager.getBestProvider(criteria, true);
         mlocManager.requestLocationUpdates(locationProvider, 0, 0, mlocListener);
 
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new GetPOITask(), 5000, QUERY_TIMER);
+        
+        speaker = new Speaker();
+        speaker.start();
 	}
 	
 	private void initializeWaypoints() {
@@ -238,18 +250,7 @@ public class MainActivity extends FragmentActivity {
 		return super.onOptionsItemSelected(item);
 	}
 
-    public void speakText(View view) {
-    	if (mCurrentLocation == null) {
-    		speak("I don't know where I am.");
-    		return;
-    	}
-    	
-    	new SpeakPOITask().execute();
-    }
-    
     private void speak(String toSpeak) {
-        Toast.makeText(getApplicationContext(), toSpeak,
-        Toast.LENGTH_SHORT).show();
         ttobj.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
     }
     
@@ -284,10 +285,17 @@ public class MainActivity extends FragmentActivity {
 		public void onStatusChanged(String arg0, int arg1, Bundle arg2) {}
     }
     
-    class SpeakPOITask extends AsyncTask<String, Void, String> {
+    class GetPOITask extends TimerTask {
+    	public void run() {
+    		if (mCurrentLocation != null)
+    	        new SpeakPOITask().execute();
+    	}
+    }
+
+    class SpeakPOITask extends AsyncTask<String, Void, List<Trip.POI>> {
 
 		@Override
-		protected String doInBackground(String... args) {
+		protected List<Trip.POI> doInBackground(String... args) {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpGet httpGet = new HttpGet(
 					"http://simple.mit.edu:8101/getPOIs?location="
@@ -303,17 +311,44 @@ public class MainActivity extends FragmentActivity {
 				JSONTokener tokener = new JSONTokener(builder.toString());
 				JSONObject finalResult = new JSONObject(tokener);
 				JSONArray POIs = finalResult.getJSONArray("POIs");
-				JSONObject POI = POIs.getJSONObject(0);
-				return POI.getString("summary");
+				List<Trip.POI> result = new ArrayList<Trip.POI>();
+				for (int i = 0; i < POIs.length(); i++) {
+					if (POIs.get(i) == null)
+						continue;
+					JSONObject POI = POIs.getJSONObject(i);
+					JSONObject loc = POI.getJSONObject("location");
+					Location loc_ = new Location(mCurrentLocation);
+					loc_.setLatitude(loc.getDouble("lat"));
+					loc_.setLongitude(loc.getDouble("lng"));
+					POI POI_ = new POI(POI.getString("name"), loc_, POI.getString("summary"));
+					result.add(POI_);
+			    }
+			    return result;
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			return "error";
+			return null;
 		}
 
         @Override
-		protected void onPostExecute(String result) {
-        	speak(result);
+		protected void onPostExecute(List<POI> POIs) {
+        	if (POIs != null)
+        	    trip.setNewPOIs(POIs);
         }
+    }
+    
+    class Speaker extends Thread {
+		@Override
+		public void run() {
+			while (true) {
+				if (!ttobj.isSpeaking() && !trip.pois.isEmpty()) {
+					POI poi = trip.pois.remove(0);
+					speak(poi.summary);
+				}
+				try {
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {}
+			}
+		}
     }
 }
