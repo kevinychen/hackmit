@@ -25,19 +25,19 @@
         android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="2"
-        android:paddingLeft="30dip"
-        android:paddingRight="30dip" >
+        android:paddingLeft="25dip"
+        android:paddingRight="25dip">
 
         <EditText
             android:id="@+id/destination_message"
-            android:layout_width="wrap_content"
+            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
  			android:layout_centerHorizontal="true"
  			android:layout_centerVertical="true"
             android:ems="10"
             android:hint="@string/destination"
             android:gravity="center"
-            android:singleLine="true" >
+            android:singleLine="true">
         </EditText>
     </RelativeLayout>
 
@@ -51,8 +51,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
  		android:layout_centerHorizontal="true"
-        android:onClick="speakText"
-        android:text="@string/text1" />
+ 		android:textColor="#F27E00"
+		android:textSize="25sp"
+		android:background="@drawable/button_selector"
+
+
+        android:onClick="goToHome"
+        android:text="@string/button_send" />
     </RelativeLayout>
 
 </LinearLayout>

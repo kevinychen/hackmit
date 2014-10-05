@@ -1,28 +1,15 @@
 package com.example.waypal;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.IOException;
+import java.util.List;
 import java.util.Locale;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.json.JSONArray;
-import org.json.JSONObject;
-import org.json.JSONTokener;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.Context;
 import android.content.Intent;
-import android.location.Criteria;
-import android.location.Location;
-import android.location.LocationListener;
-import android.location.LocationManager;
-import android.os.AsyncTask;
+import android.location.Address;
+import android.location.Geocoder;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -35,11 +22,10 @@ import android.widget.Toast;
 
 public class HomeActivity extends Activity {
 	
-	public final static String EXTRA_MESSAGE = "com.example.waypal.MESSAGE";
+	public final static String DESTINATION = "com.example.waypal.DESTINATION";
 	
-    TextToSpeech ttobj;
-    Location mCurrentLocation;
-
+	Geocoder geocoder;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -47,29 +33,8 @@ public class HomeActivity extends Activity {
 		if (savedInstanceState == null) {
 			getFragmentManager().beginTransaction()
 					.add(R.id.container, new PlaceholderFragment()).commit();
+			geocoder = new Geocoder(this, Locale.US);
 		}
-        ttobj = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                if(status != TextToSpeech.ERROR){
-                    ttobj.setLanguage(Locale.UK);
-                }
-            }
-        });
-
-        /* Use the LocationManager class to obtain GPS locations */
-        LocationManager mlocManager = (LocationManager) 
-                getSystemService(Context.LOCATION_SERVICE);
-        LocationListener mlocListener = new CustomLocationListener(
-                getApplicationContext());
-        Criteria criteria = new Criteria();
-        criteria.setAccuracy(Criteria.ACCURACY_FINE);
-        criteria.setAltitudeRequired(false);
-        criteria.setBearingRequired(false);
-        criteria.setCostAllowed(true);
-        criteria.setPowerRequirement(Criteria.POWER_LOW);   
-        String locationProvider = mlocManager.getBestProvider(criteria, true);
-        mlocManager.requestLocationUpdates(locationProvider, 0, 0, mlocListener);
 	}
 
 	@Override
@@ -91,36 +56,24 @@ public class HomeActivity extends Activity {
 		return super.onOptionsItemSelected(item);
 	}
 	
-	/*
-	public void sendMessage(View view) {
-		Intent intent = new Intent(this, DisplayMessageActivity.class);
-		EditText editText = (EditText) findViewById(R.id.edit_message);
-		String message = editText.getText().toString();
-		intent.putExtra(EXTRA_MESSAGE, message);
-		startActivity(intent);
-	}*/
-
-    public void speakText(View view) {
-    	if (mCurrentLocation == null) {
-    		speak("I don't know where I am.");
-    		return;
-    	}
-    	
-    	new SpeakPOITask().execute();
-    }
-    
-    private void speak(String toSpeak) {
-        Toast.makeText(getApplicationContext(), toSpeak,
-        Toast.LENGTH_SHORT).show();
-        ttobj.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
-        
+	public void goToHome(View view) {
 		Intent intent = new Intent(this, MainActivity.class);
-//		EditText editText = (EditText) findViewById(R.id.destination_message);
-//		String message = editText.getText().toString();
-//		intent.putExtra(EXTRA_MESSAGE, message);
-		startActivity(intent);
-    }
-    
+		EditText editText = (EditText) findViewById(R.id.destination_message);
+		String dest = editText.getText().toString();
+		try {
+			List<Address> results = geocoder.getFromLocationName(dest, 1);
+			if (results.size() < 1) {
+				Toast.makeText(this, "Could not find " + dest, Toast.LENGTH_SHORT).show();
+				return;
+			}
+     		intent.putExtra(DESTINATION, results.get(0));
+     		startActivity(intent);
+		} catch (IOException e) {
+			e.printStackTrace();
+			Toast.makeText(this, "Connection error.", Toast.LENGTH_SHORT).show();
+		}
+	}
+
 	/**
 	 * A placeholder fragment containing a simple view.
 	 */
@@ -139,58 +92,4 @@ public class HomeActivity extends Activity {
 		}
 	}
 	
-    class CustomLocationListener implements LocationListener {
-
-        private Context m_context;
-
-        public CustomLocationListener(Context context) {
-            m_context = context;
-        }
-
-        @Override
-        public void onLocationChanged(Location location) {
-            mCurrentLocation = location;
-            double latitude = location.getLatitude();
-            double longitude = location.getLongitude();
-            String Text = latitude + " " + longitude;
-            Toast.makeText(m_context, Text, Toast.LENGTH_SHORT).show();
-        }
-
-        public void onProviderDisabled(String provider) {}
-
-        public void onProviderEnabled(String provider) {}
-
-        public void onStatusChanged(String arg0, int arg1, Bundle arg2) {}
-    }
-    
-    class SpeakPOITask extends AsyncTask<String, Void, String> {
-
-		protected String doInBackground(String... args) {
-			HttpClient httpClient = new DefaultHttpClient();
-			HttpGet httpGet = new HttpGet(
-					"http://simple.mit.edu:8101/getPOIs?location="
-							+ mCurrentLocation.getLatitude() + ","
-							+ mCurrentLocation.getLongitude());
-			try {
-				HttpResponse response = httpClient.execute(httpGet);
-				BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
-				StringBuilder builder = new StringBuilder();
-				for (String line = null; (line = reader.readLine()) != null;) {
-				    builder.append(line).append("\n");
-				}
-				JSONTokener tokener = new JSONTokener(builder.toString());
-				JSONObject finalResult = new JSONObject(tokener);
-				JSONArray POIs = finalResult.getJSONArray("POIs");
-				JSONObject POI = POIs.getJSONObject(0);
-				return POI.getString("summary");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			return "error";
-		}
-
-        protected void onPostExecute(String result) {
-        	speak(result);
-        }
-    }
 }
