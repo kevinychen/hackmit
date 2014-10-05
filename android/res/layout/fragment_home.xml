@@ -2,58 +2,57 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" 
+    android:orientation="vertical"
     tools:context="com.example.waypal.HomeActivity$PlaceholderFragment" >
 
-        <LinearLayout
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1" >
+
+        <ImageView
+            android:id="@+id/imageView1"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_weight="1" >
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
+            android:paddingLeft="25dip"
+            android:paddingRight="25dip"
+            android:src="@drawable/waypal" />
+    </RelativeLayout>
 
-            <ImageView
-                android:id="@+id/imageView1"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
-                android:paddingLeft="25dip"
-				android:paddingRight="25dip"
-                android:src="@drawable/waypal" />
-
-        </LinearLayout>
-
-    <LinearLayout android:layout_width="fill_parent"
+    <RelativeLayout
+        android:layout_width="fill_parent"
         android:layout_height="fill_parent"
-        android:layout_weight="1">
+        android:layout_weight="2"
+        android:paddingLeft="30dip"
+        android:paddingRight="30dip" >
 
-    <Button
-        android:id="@+id/button1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/edit_message"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="26dp"
-        android:onClick="sendMessage"
-        android:text="@string/button_send" />
+        <EditText
+            android:id="@+id/destination_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+ 			android:layout_centerHorizontal="true"
+ 			android:layout_centerVertical="true"
+            android:ems="10"
+            android:hint="@string/destination"
+            android:gravity="center"
+            android:singleLine="true" >
+        </EditText>
+    </RelativeLayout>
 
-    <EditText
-        android:id="@+id/edit_message"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_weight="1"
-        android:ems="10"
-        android:hint="@string/edit_message" >
-
-        <requestFocus />
-    </EditText>
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="2" >
 
     <Button
         android:id="@+id/button2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="188dp"
-        android:layout_marginRight="60dp"
+ 		android:layout_centerHorizontal="true"
         android:onClick="speakText"
         android:text="@string/text1" />
-
-    </LinearLayout>
+    </RelativeLayout>
 
 </LinearLayout>

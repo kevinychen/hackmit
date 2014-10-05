@@ -1,0 +1,24 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:animateLayoutChanges="true"
+    tools:context="com.example.waypal.MainActivity">
+
+	<fragment
+  		android:id="@+id/map"
+  		android:name="com.google.android.gms.maps.MapFragment"
+  		android:layout_width="match_parent"
+  		android:layout_height="match_parent"
+  		android:layout_weight="1" />
+
+    <fragment
+        android:id="@+id/pois"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="2"
+        class="com.example.waypal.POIListFragment"
+        android:name="com.example.waypal.POIFragment"/>
+</LinearLayout>

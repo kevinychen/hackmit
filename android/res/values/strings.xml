@@ -5,10 +5,12 @@
     <string name="hello_world">Hello world! my friend</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_home">HomeActivity</string>
-    <string name="edit_message">Enter a message.</string>
-    <string name="button_send">Send</string>
+    <string name="username">Username</string>
+    <string name="start">Start Address</string>
+    <string name="destination">Where to?</string>
+    <string name="button_send">Go Explore!</string>
     <string name="text1">Click me!</string>
-    <string name="title_activity_display_message">DisplayMessageActivity</string>
+    <string name="title_activity_main">Main</string>
     
 
 </resources>
