@@ -32,6 +32,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.waypal.Trip.POI;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -49,6 +50,7 @@ public class MainActivity extends FragmentActivity {
     TextToSpeech ttobj;
 	Trip trip;
     Location mCurrentLocation;
+    boolean tripInitialized = false;
     LatLng start, dest;
 	
 	@Override
@@ -106,6 +108,56 @@ public class MainActivity extends FragmentActivity {
 
 	}
 	
+	private void initializeWaypoints() {
+		if (tripInitialized) {
+			return;
+		}
+
+		Map<String, Object> waypoints = new HashMap<String, Object>();
+		
+		waypoints.put("waypoint1", new Waypoint("current location", mCurrentLocation));
+		waypoints.put("waypoint2", new Waypoint("destination", getDestination()));
+
+		myFirebaseRef.child("waypoints").setValue(waypoints);
+		tripInitialized = true;
+	}
+
+	private void addWaypoint(final POI poi) {
+		myFirebaseRef.child("waypoints").addListenerForSingleValueEvent(new ValueEventListener() {
+		    @Override
+		    public void onDataChange(DataSnapshot snapshot) {
+		    	Map<String, Object> waypoints = (Map<String, Object>) snapshot.getValue();
+
+		    	int len = waypoints.size();
+		    	waypoints.put("waypoint" + (len + 1), new Waypoint(poi));
+		    	
+		    	myFirebaseRef.child("waypoints").setValue(waypoints);
+		    }
+
+		    @Override
+		    public void onCancelled(FirebaseError firebaseError) {
+		    }
+		});
+	}
+	
+	private void removeWaypoint(final String name) {
+		myFirebaseRef.child("waypoints").addListenerForSingleValueEvent(new ValueEventListener() {
+		    @Override
+		    public void onDataChange(DataSnapshot snapshot) {
+		    	Map<String, Object> waypoints = (Map<String, Object>) snapshot.getValue();
+		    	
+		    	if (waypoints.containsKey(name)) {
+		    		waypoints.remove(name);
+		    	}
+		    	myFirebaseRef.child("waypoints").setValue(waypoints);
+		    }
+
+		    @Override
+		    public void onCancelled(FirebaseError firebaseError) {
+		    }
+		});
+	}
+
 	private void setUpMap() {
 	    // Do a null check to confirm that we have not already instantiated the map.
 	    if (map == null) {
@@ -182,6 +234,10 @@ public class MainActivity extends FragmentActivity {
         @Override
         public void onLocationChanged(Location location) {
             mCurrentLocation = location;
+            
+            // Idempotent function
+            initializeWaypoints();
+
             double latitude = location.getLatitude();
             double longitude = location.getLongitude();
             String Text = latitude + " " + longitude;
