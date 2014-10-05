@@ -4,7 +4,12 @@ import java.util.Locale;
 
 import android.app.Activity;
 import android.app.Fragment;
+import android.content.Context;
 import android.content.Intent;
+import android.location.Criteria;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.view.LayoutInflater;
@@ -20,6 +25,7 @@ public class HomeActivity extends Activity {
 	public final static String EXTRA_MESSAGE = "com.example.waypal.MESSAGE";
 	
     TextToSpeech ttobj;
+    Location mCurrentLocation;
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +43,20 @@ public class HomeActivity extends Activity {
                 }
             }
         });
+
+        /* Use the LocationManager class to obtain GPS locations */
+        LocationManager mlocManager = (LocationManager) 
+                getSystemService(Context.LOCATION_SERVICE);
+        LocationListener mlocListener = new CustomLocationListener(
+                getApplicationContext());
+        Criteria criteria = new Criteria();
+        criteria.setAccuracy(Criteria.ACCURACY_FINE);
+        criteria.setAltitudeRequired(false);
+        criteria.setBearingRequired(false);
+        criteria.setCostAllowed(true);
+        criteria.setPowerRequirement(Criteria.POWER_LOW);   
+        String locationProvider = mlocManager.getBestProvider(criteria, true);
+        mlocManager.requestLocationUpdates(locationProvider, 0, 0, mlocListener);
 	}
 
 	@Override
@@ -67,7 +87,13 @@ public class HomeActivity extends Activity {
 	}
 
     public void speakText(View view) {
-        String toSpeak = "I can speak!";
+    	String toSpeak;
+    	if (mCurrentLocation != null) {
+            toSpeak = "My latitude is " + mCurrentLocation.getLatitude() +
+                       " and my longitude is " + mCurrentLocation.getLongitude();
+    	} else {
+    		toSpeak = "I don't know where I am.";
+    	}
         Toast.makeText(getApplicationContext(), toSpeak,
         Toast.LENGTH_SHORT).show();
         ttobj.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
@@ -89,4 +115,28 @@ public class HomeActivity extends Activity {
 			return rootView;
 		}
 	}
+	
+    public class CustomLocationListener implements LocationListener {
+
+        private Context m_context;
+
+        public CustomLocationListener(Context context) {
+            m_context = context;
+        }
+
+        @Override
+        public void onLocationChanged(Location location) {
+            mCurrentLocation = location;
+            double latitude = location.getLatitude();
+            double longitude = location.getLongitude();
+            String Text = latitude + " " + longitude;
+            Toast.makeText(m_context, Text, Toast.LENGTH_SHORT).show();
+        }
+
+        public void onProviderDisabled(String provider) {}
+
+        public void onProviderEnabled(String provider) {}
+
+        public void onStatusChanged(String arg0, int arg1, Bundle arg2) {}
+    }
 }
