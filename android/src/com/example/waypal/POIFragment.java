@@ -1,5 +1,7 @@
 package com.example.waypal;
 
+import java.util.ArrayList;
+
 import android.app.ListFragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -11,7 +13,9 @@ import android.widget.ListView;
 public class POIFragment extends ListFragment {
 	
 	ListView waypoints;
-	String[] data = new String[] {"one", "two", "three"};
+	ArrayList<String> data = new ArrayList<String>();
+	ArrayAdapter<String>  mAdapter;
+	boolean viewCreated = false;
 	
 	public POIFragment() {
 	}
@@ -20,11 +24,36 @@ public class POIFragment extends ListFragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 		
-		ArrayAdapter<String> adapter = new ArrayAdapter<String>(inflater.getContext(),
+		
+		data.add("SUPER COOL");
+		data.add("SUPER SWEET");
+		mAdapter = new ArrayAdapter<String>(inflater.getContext(),
 				android.R.layout.simple_list_item_1, data);
-		setListAdapter(adapter);
+		setListAdapter(mAdapter);
 		View rootView = super.onCreateView(inflater, container, savedInstanceState);
+		viewCreated = true;
+		
+		setListItems(new String[]{"testing", "testing123"});
 
 		return rootView;
+	}
+	
+	@Override
+	public void onListItemClick(ListView l, View v, int position, long id) {
+
+	}
+	
+	public void setListItems(String[] items) {
+		if (!viewCreated) {
+			return;
+		}
+
+		mAdapter.clear();
+		data.clear();
+		for (int i = 0; i < items.length; i++) {
+		        mAdapter.add(items[i]);
+		        data.add(items[i]);
+		}
+		mAdapter.notifyDataSetChanged();	
 	}
 }
