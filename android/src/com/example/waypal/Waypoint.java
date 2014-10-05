@@ -1,5 +1,6 @@
 package com.example.waypal;
 
+import com.example.waypal.Trip.POI;
 import com.google.android.gms.maps.model.LatLng;
 
 public class Waypoint {
@@ -22,11 +23,8 @@ public class Waypoint {
 		this.stopover = "true";
 	}
 	
-	public Waypoint(POIobj o) {
-		this.name = o.name;
-		this.lat = o.lat;
-		this.lng = o.lng;
-		this.stopover = "true";
+	public Waypoint(POI o) {
+		this(o.name, o.loc);
 	}
 	
 	public String getLat() {
@@ -53,9 +51,4 @@ public class Waypoint {
 	public void setStopover(String stopover) {
 		this.stopover = stopover;
 	}
-	
-	
-	
-	
-
 }

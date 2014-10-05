@@ -30,6 +30,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.waypal.Trip.POI;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
@@ -118,7 +119,7 @@ public class MainActivity extends Activity {
 		tripInitialized = true;
 	}
 
-	private void addWaypoint(final POIobj poi) {
+	private void addWaypoint(final POI poi) {
 		myFirebaseRef.child("waypoints").addListenerForSingleValueEvent(new ValueEventListener() {
 		    @Override
 		    public void onDataChange(DataSnapshot snapshot) {
@@ -135,7 +136,6 @@ public class MainActivity extends Activity {
 		    }
 		});
 	}
-	
 	
 	private void removeWaypoint(final String name) {
 		myFirebaseRef.child("waypoints").addListenerForSingleValueEvent(new ValueEventListener() {
