@@ -37,6 +37,7 @@ import com.firebase.client.ValueEventListener;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 public class MainActivity extends Activity {
 
@@ -180,8 +181,15 @@ public class MainActivity extends Activity {
             mCurrentLocation = location;
             double latitude = location.getLatitude();
             double longitude = location.getLongitude();
-            String Text = latitude + " " + longitude;
-            Toast.makeText(m_context, Text, Toast.LENGTH_SHORT).show();
+            String text = latitude + " " + longitude;
+            Toast.makeText(m_context, text, Toast.LENGTH_SHORT).show();
+            
+            if (start == null) {
+            	start = new LatLng(latitude, longitude);
+            	// Compute route
+            	map.addPolyline(new PolylineOptions().add(start, dest).geodesic(true));
+            	Toast.makeText(m_context, start + " " + dest, Toast.LENGTH_SHORT).show();
+            }
         }
 
         @Override
