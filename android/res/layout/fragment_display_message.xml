@@ -5,7 +5,7 @@
     android:orientation="vertical" 
     tools:context="com.example.waypal.DisplayMessageActivity$PlaceholderFragment" >
 
-    <LinearLayout android:layout_width="fill_parent"
+    <RelativeLayout android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="1">
 		<fragment
@@ -13,9 +13,9 @@
           android:layout_width="match_parent"
           android:layout_height="match_parent"
           android:name="com.google.android.gms.maps.MapFragment"/>
-    </LinearLayout>
+    </RelativeLayout>
     
-    <LinearLayout android:layout_width="fill_parent"
+    <RelativeLayout android:layout_width="fill_parent"
         android:layout_height="fill_parent"
         android:layout_weight="2">
         <TextView
@@ -29,5 +29,5 @@
               android:layout_height="wrap_content"
               android:layout_width="match_parent">
         </ListView>
-    </LinearLayout>
+    </RelativeLayout>
 </LinearLayout>
