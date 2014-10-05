@@ -83,10 +83,18 @@ public class POIFragment extends ListFragment {
 	@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
 		System.out.println("position: " + position);
-		Context context = getActivity();
+		if (myFirebaseRef == null || trip == null) {
+			return;
+		}
 		String name = data.get(position);
-        Toast.makeText(context, "You've added a new waypoint: " + name, Toast.LENGTH_LONG).show();
-        removeItem(position);
+        Toast.makeText(getActivity(), "You've added a new waypoint: " + name, Toast.LENGTH_LONG).show();
+        for(POI poi : trip.pois){
+        	if (poi.name.equals(name)) {
+        		addWaypoint(poi);
+        		removeItem(position);
+        		return;
+        	}
+        }
 	}
 	
 	public void removeItem(int i) {
