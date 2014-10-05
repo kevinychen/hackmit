@@ -153,15 +153,19 @@ public class HomeActivity extends Activity {
             Toast.makeText(m_context, Text, Toast.LENGTH_SHORT).show();
         }
 
-        public void onProviderDisabled(String provider) {}
+        @Override
+		public void onProviderDisabled(String provider) {}
 
-        public void onProviderEnabled(String provider) {}
+        @Override
+		public void onProviderEnabled(String provider) {}
 
-        public void onStatusChanged(String arg0, int arg1, Bundle arg2) {}
+        @Override
+		public void onStatusChanged(String arg0, int arg1, Bundle arg2) {}
     }
     
     class SpeakPOITask extends AsyncTask<String, Void, String> {
 
+		@Override
 		protected String doInBackground(String... args) {
 			HttpClient httpClient = new DefaultHttpClient();
 			HttpGet httpGet = new HttpGet(
@@ -186,7 +190,8 @@ public class HomeActivity extends Activity {
 			return "error";
 		}
 
-        protected void onPostExecute(String result) {
+        @Override
+		protected void onPostExecute(String result) {
         	speak(result);
         }
     }
