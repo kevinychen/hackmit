@@ -28,6 +28,9 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.speech.RecognitionListener;
+import android.speech.RecognizerIntent;
+import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.support.v4.app.FragmentActivity;
 import android.view.Menu;
@@ -59,7 +62,9 @@ public class MainActivity extends FragmentActivity {
     boolean tripInitialized = false;
     LatLng start, dest;
     Timer timer;  // triggers a call to getPOIs every once in a while
+    Timer timer2;  // listens to user every once in a while
     Thread speaker;  // thread that keeps talking
+    SpeechRecognizer sr;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -131,6 +136,8 @@ public class MainActivity extends FragmentActivity {
 
         timer = new Timer();
         timer.scheduleAtFixedRate(new GetPOITask(), 5000, QUERY_TIMER);
+        timer2 = new Timer();
+        timer2.scheduleAtFixedRate(new FeedbackTask(), 1000, 5000);
         
         speaker = new Speaker();
         speaker.start();
@@ -158,6 +165,9 @@ public class MainActivity extends FragmentActivity {
                         });
         thisView.setOnTouchListener(touchListener);
         thisView.setOnScrollListener(touchListener.makeScrollListener());
+        
+        sr = SpeechRecognizer.createSpeechRecognizer(this);       
+        sr.setRecognitionListener(new Listener());
 	}
 	
 	private void initializeWaypoints() {
@@ -326,6 +336,21 @@ public class MainActivity extends FragmentActivity {
     	}
     }
 
+    class FeedbackTask extends TimerTask {
+		public void run() {
+			runOnUiThread(new Runnable() {
+				@Override
+				public void run() {
+			        Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+			        intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+			        intent.putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, "voice.recognition.test");
+			        intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 5);
+			        sr.startListening(intent);
+				}
+			});
+		}
+	}
+
     class SpeakPOITask extends AsyncTask<String, Void, List<Trip.POI>> {
 
 		@Override
@@ -398,4 +423,26 @@ public class MainActivity extends FragmentActivity {
 			}
 		}
     }
+
+	class Listener implements RecognitionListener {
+		public void onReadyForSpeech(Bundle params) {}
+		public void onBeginningOfSpeech() {}
+		public void onRmsChanged(float rmsdB) {}
+		public void onBufferReceived(byte[] buffer) {}
+		public void onEndOfSpeech() {}
+		public void onError(int error) {}
+		public void onPartialResults(Bundle partialResults) {}
+		public void onEvent(int eventType, Bundle params) {}
+
+		public void onResults(Bundle results) {
+			List<String> data = results
+					.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
+			String yousaid = data.get(0);
+			if (yousaid.equalsIgnoreCase("cool")) {
+				speak("You're interested? Ok let's go!");
+			} else if (yousaid.equalsIgnoreCase("next")) {
+				speak("Bored? Ok next one then");
+			}
+		}
+	}
 }
