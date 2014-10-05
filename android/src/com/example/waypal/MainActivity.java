@@ -75,6 +75,10 @@ public class MainActivity extends Activity {
 			  @Override
 			  public void onDataChange(DataSnapshot snapshot) {
 				  Map<String, Object> waypoints = (Map<String, Object>)snapshot.getValue();
+				  if (waypoints == null) {
+					  return;
+				  }
+
 				  Map<String, Waypoint> waypointMap = new HashMap<String, Waypoint>();
 				  
 				  for(String key : waypoints.keySet()) {
@@ -257,39 +261,6 @@ public class MainActivity extends Activity {
     }
     
     class SpeakPOITask extends AsyncTask<String, Void, String> {
-
-		@Override
-		protected String doInBackground(String... args) {
-			HttpClient httpClient = new DefaultHttpClient();
-			HttpGet httpGet = new HttpGet(
-					"http://simple.mit.edu:8101/getPOIs?location="
-							+ mCurrentLocation.getLatitude() + ","
-							+ mCurrentLocation.getLongitude());
-			try {
-				HttpResponse response = httpClient.execute(httpGet);
-				BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
-				StringBuilder builder = new StringBuilder();
-				for (String line = null; (line = reader.readLine()) != null;) {
-				    builder.append(line).append("\n");
-				}
-				JSONTokener tokener = new JSONTokener(builder.toString());
-				JSONObject finalResult = new JSONObject(tokener);
-				JSONArray POIs = finalResult.getJSONArray("POIs");
-				JSONObject POI = POIs.getJSONObject(0);
-				return POI.getString("summary");
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-			return "error";
-		}
-
-        @Override
-		protected void onPostExecute(String result) {
-        	speak(result);
-        }
-    }
-    
-    class SetWaypointTask extends AsyncTask<String, Void, String> {
 
 		@Override
 		protected String doInBackground(String... args) {
