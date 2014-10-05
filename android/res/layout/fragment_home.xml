@@ -33,17 +33,16 @@
         android:layout_marginTop="26dp"
         android:onClick="sendMessage"
         android:text="@string/button_send" />
-    
-        <Button
+
+    <Button
         android:id="@+id/button2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
         android:layout_marginBottom="188dp"
         android:layout_marginRight="60dp"
         android:onClick="speakText"
         android:text="@string/text1" />
+
     </LinearLayout>
 
 </LinearLayout>

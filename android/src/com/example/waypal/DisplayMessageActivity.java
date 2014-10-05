@@ -34,7 +34,7 @@ public class DisplayMessageActivity extends Activity {
 		textView.setTextSize(40);
 		textView.setText(message);
 		
-		setContentView(textView);
+		//setContentView(textView);
 		return true;
 	}
 
