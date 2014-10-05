@@ -114,12 +114,12 @@ public class MainActivity extends Activity {
 		waypoints.put("waypoint1", new Waypoint("current location", mCurrentLocation));
 		waypoints.put("waypoint2", new Waypoint("destination", getDestination()));
 
-		myFirebaseRef.child(trip.id).child("waypoints").setValue(waypoints);
+		myFirebaseRef.child("waypoints").setValue(waypoints);
 		tripInitialized = true;
 	}
 
 	private void addWaypoint(final POIobj poi) {
-		myFirebaseRef.child(trip.id).child("waypoints").addListenerForSingleValueEvent(new ValueEventListener() {
+		myFirebaseRef.child("waypoints").addListenerForSingleValueEvent(new ValueEventListener() {
 		    @Override
 		    public void onDataChange(DataSnapshot snapshot) {
 		    	Map<String, Object> waypoints = (Map<String, Object>) snapshot.getValue();
@@ -127,7 +127,7 @@ public class MainActivity extends Activity {
 		    	int len = waypoints.size();
 		    	waypoints.put("waypoint" + (len + 1), new Waypoint(poi));
 		    	
-		    	myFirebaseRef.child(trip.id).child("waypoints").setValue(waypoints);
+		    	myFirebaseRef.child("waypoints").setValue(waypoints);
 		    }
 
 		    @Override
@@ -138,7 +138,7 @@ public class MainActivity extends Activity {
 	
 	
 	private void removeWaypoint(final String name) {
-		myFirebaseRef.child(trip.id).child("waypoints").addListenerForSingleValueEvent(new ValueEventListener() {
+		myFirebaseRef.child("waypoints").addListenerForSingleValueEvent(new ValueEventListener() {
 		    @Override
 		    public void onDataChange(DataSnapshot snapshot) {
 		    	Map<String, Object> waypoints = (Map<String, Object>) snapshot.getValue();
@@ -146,7 +146,7 @@ public class MainActivity extends Activity {
 		    	if (waypoints.containsKey(name)) {
 		    		waypoints.remove(name);
 		    	}
-		    	myFirebaseRef.child(trip.id).child("waypoints").setValue(waypoints);
+		    	myFirebaseRef.child("waypoints").setValue(waypoints);
 		    }
 
 		    @Override
