@@ -25,6 +25,7 @@ import org.json.JSONTokener;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.location.Address;
 import android.location.Criteria;
 import android.location.Location;
@@ -48,9 +49,11 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 public class MainActivity extends FragmentActivity {
@@ -294,6 +297,7 @@ public class MainActivity extends FragmentActivity {
 			
 			PolylineOptions polyline = new PolylineOptions();
 			JSONObject route = routes.getJSONObject(0);
+			JSONObject bounds = route.getJSONObject("bounds");
 			JSONArray legs = route.getJSONArray("legs");
 			for (int i = 0; i < legs.length(); i++) {
 				JSONArray steps = legs.getJSONObject(i).getJSONArray("steps");
@@ -303,7 +307,10 @@ public class MainActivity extends FragmentActivity {
 				}
 			}
 //			System.out.println(polyline);
-			map.addPolyline(polyline.geodesic(true));
+			map.addPolyline(polyline.geodesic(true).color(Color.BLUE));
+			System.out.println(bounds);
+			System.out.println(parseLatLngBounds(bounds));
+			map.animateCamera(CameraUpdateFactory.newLatLngBounds(parseLatLngBounds(bounds), 30));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -316,6 +323,17 @@ public class MainActivity extends FragmentActivity {
 			e.printStackTrace();
 			return null;
 		}
+	}
+	
+	private LatLngBounds parseLatLngBounds(JSONObject obj) {
+	    try {
+			LatLng sw = parseLatLng(obj.getJSONObject("southwest"));
+			LatLng ne = parseLatLng(obj.getJSONObject("northeast"));
+			return new LatLngBounds(sw, ne);
+		} catch (JSONException e) {
+			e.printStackTrace();
+			return null;
+		}			
 	}
 	
 	private List<LatLng> decodePoly(String encoded) {
@@ -414,9 +432,9 @@ public class MainActivity extends FragmentActivity {
             // Idempotent function
             initializeWaypoints();
 
-            double latitude = location.getLatitude();
-            double longitude = location.getLongitude();
-            String Text = latitude + " " + longitude;
+//            double latitude = location.getLatitude();
+//            double longitude = location.getLongitude();
+//            String Text = latitude + " " + longitude;
 //            Toast.makeText(m_context, Text, Toast.LENGTH_SHORT).show();
         }
 
