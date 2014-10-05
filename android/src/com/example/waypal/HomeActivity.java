@@ -111,6 +111,12 @@ public class HomeActivity extends Activity {
         Toast.makeText(getApplicationContext(), toSpeak,
         Toast.LENGTH_SHORT).show();
         ttobj.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
+        
+		Intent intent = new Intent(this, DisplayMessageActivity.class);
+		EditText editText = (EditText) findViewById(R.id.destination_message);
+		String message = editText.getText().toString();
+		intent.putExtra(EXTRA_MESSAGE, message);
+		startActivity(intent);
     }
     
 	/**
