@@ -40,6 +40,9 @@ public class POIFragment extends ListFragment {
 		
 		data.add("SUPER COOL");
 		data.add("SUPER SWEET");
+		data.add("SUPER SWET");
+		data.add("SUPER SWT");
+		data.add("SUPER ST");
 		mAdapter = new ArrayAdapter<String>(inflater.getContext(),
 				android.R.layout.simple_list_item_1, data);
 		setListAdapter(mAdapter);
@@ -87,11 +90,11 @@ public class POIFragment extends ListFragment {
 			return;
 		}
 		String name = data.get(position);
-        Toast.makeText(getActivity(), "You've added a new waypoint: " + name, Toast.LENGTH_LONG).show();
+        removeItem(position);
         for(POI poi : trip.pois){
         	if (poi.name.equals(name)) {
         		addWaypoint(poi);
-        		removeItem(position);
+        		Toast.makeText(getActivity(), "You've added a new waypoint: " + name, Toast.LENGTH_LONG).show();
         		return;
         	}
         }
