@@ -134,12 +134,15 @@ public class POIFragment extends ListFragment {
 			return;
 		}
 
+		HashSet<String> old = new HashSet<String>();
+
 		mAdapter.clear();
 		for (int i = 0; i < items.length; i++) {
 
-			if (alreadySeen.contains(items[i])) {
+			if (alreadySeen.contains(items[i]) || old.contains(items[i])) {
 				continue;
 			}
+			old.add(items[i]);
 			mAdapter.add(items[i]);
 		}
 		mAdapter.notifyDataSetChanged();	

@@ -292,8 +292,11 @@ public class MainActivity extends FragmentActivity {
     
 	private void notifyPOIsChanged() {
 		String[] items = new String[trip.pois.size()];
-		for (int i = 0; i < 3 && i < items.length; i++)
+		for (int i = 0; i < items.length; i++) {
+			if (trip.pois.get(i) == null)
+				continue;
 			items[i] = trip.pois.get(i).name;
+		}
 		poiFragment.setListItems(items);
 	}
     
@@ -315,7 +318,6 @@ public class MainActivity extends FragmentActivity {
             double latitude = location.getLatitude();
             double longitude = location.getLongitude();
             String Text = latitude + " " + longitude;
-            Toast.makeText(m_context, Text, Toast.LENGTH_SHORT).show();
         }
 
         @Override
@@ -408,6 +410,15 @@ public class MainActivity extends FragmentActivity {
 					if (trip.pois.isEmpty())
 						continue;
 					poi = trip.pois.get(0);
+					boolean inQueue = false;
+					for(String name : poiFragment.data){
+						if (name.equals(poi.name)) {
+							inQueue = true;
+						}
+					}
+					if (!inQueue) {
+						continue;
+					}
 					runOnUiThread(new Runnable() {  
 	                    @Override
 	                    public void run() {
@@ -438,9 +449,11 @@ public class MainActivity extends FragmentActivity {
 					.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION);
 			String yousaid = data.get(0);
 			if (yousaid.equalsIgnoreCase("cool")) {
+				ttobj.stop();
 				speak("You're interested? Ok let's go!");
 				poiFragment.pickWaypoint(0);
 			} else if (yousaid.equalsIgnoreCase("next")) {
+				ttobj.stop();
 				speak("Bored? Ok next one then");
 				poiFragment.removeItem(0);
 			}
