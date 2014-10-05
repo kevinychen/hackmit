@@ -1,5 +1,8 @@
 package com.example.waypal;
 
+
+import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.HashMap;
@@ -23,7 +26,6 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -39,7 +41,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
 
-public class MainActivity extends Activity {
+public class MainActivity extends FragmentActivity {
 
 	MapFragment mapFragment;
 	POIFragment poiFragment;
@@ -99,7 +101,7 @@ public class MainActivity extends Activity {
                 }
             }
         });
-
+        
         /* Use the LocationManager class to obtain GPS locations */
         LocationManager mlocManager = (LocationManager) 
                 getSystemService(Context.LOCATION_SERVICE);
@@ -113,6 +115,7 @@ public class MainActivity extends Activity {
         criteria.setPowerRequirement(Criteria.POWER_LOW);   
         String locationProvider = mlocManager.getBestProvider(criteria, true);
         mlocManager.requestLocationUpdates(locationProvider, 0, 0, mlocListener);
+
 	}
 	
 	private void initializeWaypoints() {
@@ -202,6 +205,7 @@ public class MainActivity extends Activity {
 		return true;
 	}
 
+	
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		// Handle action bar item clicks here. The action bar will

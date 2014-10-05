@@ -1,0 +1,7 @@
+INDEX VERSION 1.126+/Users/yi-shiuantung/Desktop/waypal/.metadata/.plugins/org.eclipse.jdt.core
+309135217.index
+1720289678.index
+3016957645.index
+1415693123.index
+2822811093.index
+844560353.index

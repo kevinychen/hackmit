@@ -1,0 +1,42 @@
+package com.example.waypal;
+
+import android.app.ListFragment;
+import android.os.Bundle;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+public class POIListFragment extends ListFragment {
+	
+	@Override
+    public View onCreateView(LayoutInflater inflater,ViewGroup container, Bundle savedInstanceState) {
+		String[] wayPoints = {"BSO", "Fenway", "City Hall"};
+		
+        View view =inflater.inflate(R.layout.fragment_poi, container, false);
+        System.out.println(view);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
+                android.R.layout.simple_list_item_1, wayPoints);
+        setListAdapter(adapter);
+        System.out.println(adapter);
+        return view;
+    }
+	
+	@Override
+	  public void onActivityCreated(Bundle savedInstanceState) {
+	    super.onActivityCreated(savedInstanceState);
+	    String[] values = new String[] { "Fenway", "BSO", "City Hall" };
+	    ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(),
+	        android.R.layout.simple_list_item_1, values);
+	    System.out.println(adapter);
+	    setListAdapter(adapter);
+	  }
+
+	  @Override
+	  public void onListItemClick(ListView l, View v, int position, long id) {
+	    System.out.println(v);
+	    System.out.println(l);
+	  }
+	
+}
