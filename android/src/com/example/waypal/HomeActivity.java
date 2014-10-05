@@ -1,6 +1,16 @@
 package com.example.waypal;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.Locale;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.json.JSONArray;
+import org.json.JSONObject;
+import org.json.JSONTokener;
 
 import android.app.Activity;
 import android.app.Fragment;
@@ -10,6 +20,7 @@ import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
 import android.view.LayoutInflater;
@@ -87,13 +98,15 @@ public class HomeActivity extends Activity {
 	}
 
     public void speakText(View view) {
-    	String toSpeak;
-    	if (mCurrentLocation != null) {
-            toSpeak = "My latitude is " + mCurrentLocation.getLatitude() +
-                       " and my longitude is " + mCurrentLocation.getLongitude();
-    	} else {
-    		toSpeak = "I don't know where I am.";
+    	if (mCurrentLocation == null) {
+    		speak("I don't know where I am.");
+    		return;
     	}
+    	
+    	new SpeakPOITask().execute();
+    }
+    
+    private void speak(String toSpeak) {
         Toast.makeText(getApplicationContext(), toSpeak,
         Toast.LENGTH_SHORT).show();
         ttobj.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
@@ -116,7 +129,7 @@ public class HomeActivity extends Activity {
 		}
 	}
 	
-    public class CustomLocationListener implements LocationListener {
+    class CustomLocationListener implements LocationListener {
 
         private Context m_context;
 
@@ -138,5 +151,36 @@ public class HomeActivity extends Activity {
         public void onProviderEnabled(String provider) {}
 
         public void onStatusChanged(String arg0, int arg1, Bundle arg2) {}
+    }
+    
+    class SpeakPOITask extends AsyncTask<String, Void, String> {
+
+		protected String doInBackground(String... args) {
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpGet httpGet = new HttpGet(
+					"http://simple.mit.edu:8101/getPOIs?location="
+							+ mCurrentLocation.getLatitude() + ","
+							+ mCurrentLocation.getLongitude());
+			try {
+				HttpResponse response = httpClient.execute(httpGet);
+				BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+				StringBuilder builder = new StringBuilder();
+				for (String line = null; (line = reader.readLine()) != null;) {
+				    builder.append(line).append("\n");
+				}
+				JSONTokener tokener = new JSONTokener(builder.toString());
+				JSONObject finalResult = new JSONObject(tokener);
+				JSONArray POIs = finalResult.getJSONArray("POIs");
+				JSONObject POI = POIs.getJSONObject(0);
+				return POI.getString("summary");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			return "error";
+		}
+
+        protected void onPostExecute(String result) {
+        	speak(result);
+        }
     }
 }
