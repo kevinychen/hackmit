@@ -9,6 +9,13 @@ public class Waypoint {
 	public String name;
 	public String stopover;
 	
+	public Waypoint(String name, String lat, String lng) {
+		this.name = name;
+		this.lat = lat;
+		this.lng = lng;
+		this.stopover = "true";
+	}
+	
 	public Waypoint(String name, android.location.Location loc) {
 		this.name = name;
 		this.lat = "" + loc.getLatitude();

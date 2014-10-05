@@ -72,11 +72,17 @@ public class MainActivity extends FragmentActivity {
 		tripInfo.put("id", trip.id);
 		myFirebaseRef = new Firebase("https://waypal.firebaseio.com/").child(trip.id);
 		myFirebaseRef.setValue(tripInfo);
-		myFirebaseRef.addValueEventListener(new ValueEventListener() {
+		myFirebaseRef.child("waypoints").addValueEventListener(new ValueEventListener() {
 
 			  @Override
 			  public void onDataChange(DataSnapshot snapshot) {
-			    System.out.println(snapshot.getValue());  //prints "Do you have data? You'll love Firebase."
+				  Map<String, Object> waypoints = (Map<String, Object>)snapshot.getValue();
+				  Map<String, Waypoint> waypointMap = new HashMap<String, Waypoint>();
+				  
+				  for(String key : waypoints.keySet()) {
+					  Map<String, String> waypoint = (Map<String, String>)waypoints.get(key);
+					  waypointMap.put(waypoint.get("name"), new Waypoint(waypoint.get("name"), waypoint.get("lat"), waypoint.get("lng")));
+				  }
 			  }
 
 			  @Override public void onCancelled(FirebaseError error) { }
