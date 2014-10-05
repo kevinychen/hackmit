@@ -90,7 +90,7 @@ public class POIFragment extends ListFragment {
 	
 	public void pickWaypoint(int position) {
 		System.out.println("position: " + position);
-		if (myFirebaseRef == null || trip == null) {
+		if (myFirebaseRef == null || trip == null || position >= data.size()) {
 			return;
 		}
 		String name = data.get(position);
