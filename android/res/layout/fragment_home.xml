@@ -56,7 +56,7 @@
 		android:background="@drawable/button_selector"
 
 
-        android:onClick="speakText"
+        android:onClick="goToHome"
         android:text="@string/button_send" />
     </RelativeLayout>
 

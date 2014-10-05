@@ -7,6 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 public class POIFragment extends Fragment {
+	
+	public static final int QUERY_TIMER = 60000;
 
 	public POIFragment() {
 	}
