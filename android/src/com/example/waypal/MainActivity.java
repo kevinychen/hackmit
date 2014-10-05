@@ -379,11 +379,11 @@ public class MainActivity extends FragmentActivity {
 	        POI poi = null;
 			while (true) {
 				if (!ttobj.isSpeaking() && !trip.pois.isEmpty()) {
-					poi = trip.pois.get(0);
-					if (trip.pois.get(0) == poi) {
+					if (trip.pois.get(0) == poi)
 					    trip.pois.remove(0);
-					    poi = trip.pois.get(0);
-					}
+					if (trip.pois.isEmpty())
+						continue;
+					poi = trip.pois.get(0);
 					runOnUiThread(new Runnable() {  
 	                    @Override
 	                    public void run() {

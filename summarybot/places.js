@@ -5,7 +5,7 @@ var exec = require('child_process').exec;
 var path = require('path');
 
 var port = 8101;
-var maxPOIs = 3;
+var maxPOIs = 6;
 var numSentences = 3;
 var app = express();
 app.use(express.bodyParser());
