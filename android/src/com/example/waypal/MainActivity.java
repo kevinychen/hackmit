@@ -280,6 +280,13 @@ public class MainActivity extends FragmentActivity {
         ttobj.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
     }
     
+	private void notifyPOIsChanged() {
+		String[] items = new String[trip.pois.size()];
+		for (int i = 0; i < 3 && i < items.length; i++)
+			items[i] = trip.pois.get(i).name;
+		poiFragment.setListItems(items);
+	}
+    
     class CustomLocationListener implements LocationListener {
 
         private Context m_context;
@@ -358,17 +365,30 @@ public class MainActivity extends FragmentActivity {
 
         @Override
 		protected void onPostExecute(List<POI> POIs) {
-        	if (POIs != null)
+        	if (POIs != null) {
         	    trip.setNewPOIs(POIs);
+        	    notifyPOIsChanged();
+        	}
         }
     }
     
     class Speaker extends Thread {
 		@Override
 		public void run() {
+	        POI poi = null;
 			while (true) {
 				if (!ttobj.isSpeaking() && !trip.pois.isEmpty()) {
-					POI poi = trip.pois.remove(0);
+					poi = trip.pois.get(0);
+					if (trip.pois.get(0) == poi) {
+					    trip.pois.remove(0);
+					    poi = trip.pois.get(0);
+					}
+					runOnUiThread(new Runnable() {  
+	                    @Override
+	                    public void run() {
+	                    	notifyPOIsChanged();
+	                    }
+	                });
 					speak(poi.summary);
 				}
 				try {
