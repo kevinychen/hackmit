@@ -6,6 +6,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ListView;
 
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 
@@ -15,6 +19,7 @@ public class MainActivity extends Activity {
 	MapFragment mapFragment;
 	POIFragment poiFragment;
 	GoogleMap map;
+	Firebase myFirebaseRef;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +30,20 @@ public class MainActivity extends Activity {
 			poiFragment = (POIFragment) getFragmentManager().findFragmentById(R.id.pois);
 			System.out.println(mapFragment);
 		}
+		
+		// Setup Firebase listener
+		Firebase.setAndroidContext(this);
+		myFirebaseRef = new Firebase("https://waypal.firebaseio.com/");
+		myFirebaseRef.child("trip1").addValueEventListener(new ValueEventListener() {
+
+			  @Override
+			  public void onDataChange(DataSnapshot snapshot) {
+			    System.out.println(snapshot.getValue());  //prints "Do you have data? You'll love Firebase."
+			  }
+
+			  @Override public void onCancelled(FirebaseError error) { }
+
+		});
 	}
 
 	@Override
