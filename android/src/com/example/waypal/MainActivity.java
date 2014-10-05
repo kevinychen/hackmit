@@ -439,8 +439,10 @@ public class MainActivity extends FragmentActivity {
 			String yousaid = data.get(0);
 			if (yousaid.equalsIgnoreCase("cool")) {
 				speak("You're interested? Ok let's go!");
+				poiFragment.pickWaypoint(0);
 			} else if (yousaid.equalsIgnoreCase("next")) {
 				speak("Bored? Ok next one then");
+				poiFragment.removeItem(0);
 			}
 		}
 	}
