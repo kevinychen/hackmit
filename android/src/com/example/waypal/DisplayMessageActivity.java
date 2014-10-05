@@ -9,10 +9,17 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class DisplayMessageActivity extends Activity {
 
+	ListView listView;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -21,6 +28,7 @@ public class DisplayMessageActivity extends Activity {
 			getFragmentManager().beginTransaction()
 					.add(R.id.container, new PlaceholderFragment()).commit();
 		}
+		/*
 		// Get ListView object from xml
         listView = (ListView) findViewById(R.id.list);
         
@@ -36,7 +44,7 @@ public class DisplayMessageActivity extends Activity {
                                         };
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-          android.R.layout.activity_display_message, android.R.id.list, values);
+          R.layout.fragment_display_message, android.R.id.list, values);
 
 
         // Assign adapter to ListView
@@ -63,6 +71,7 @@ public class DisplayMessageActivity extends Activity {
               }
 
          }); 
+         */
 	}
 
 	@Override
