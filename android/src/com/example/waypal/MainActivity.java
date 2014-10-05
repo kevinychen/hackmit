@@ -16,6 +16,8 @@ import org.json.JSONTokener;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
+import android.location.Address;
 import android.location.Criteria;
 import android.location.Location;
 import android.location.LocationListener;
@@ -26,7 +28,6 @@ import android.speech.tts.TextToSpeech;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
@@ -35,10 +36,10 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.model.LatLng;
 
 public class MainActivity extends Activity {
 
-	ListView listView;
 	MapFragment mapFragment;
 	POIFragment poiFragment;
 	GoogleMap map;
@@ -46,6 +47,7 @@ public class MainActivity extends Activity {
     TextToSpeech ttobj;
 	Trip trip;
     Location mCurrentLocation;
+    LatLng start, dest;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -54,10 +56,11 @@ public class MainActivity extends Activity {
 		if (savedInstanceState == null) {
 			mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
 			poiFragment = (POIFragment) getFragmentManager().findFragmentById(R.id.pois);
-			System.out.println(mapFragment);
+			setUpMap();
 		}
 
 		this.trip = new Trip();
+		this.dest = getDestination();
 
 		// Setup Firebase listener
 		Firebase.setAndroidContext(this);
@@ -99,14 +102,28 @@ public class MainActivity extends Activity {
         String locationProvider = mlocManager.getBestProvider(criteria, true);
         mlocManager.requestLocationUpdates(locationProvider, 0, 0, mlocListener);
 	}
+	
+	private void setUpMap() {
+	    // Do a null check to confirm that we have not already instantiated the map.
+	    if (map == null) {
+	        map = mapFragment.getMap();
+	        // Check if we were successful in obtaining the map.
+	        if (map != null) {
+	            // The Map is verified. It is now safe to manipulate the map.
+	        }
+	    }
+	}
+		
+	private LatLng getDestination() {
+		Intent intent = getIntent();
+		Address dest = intent.getParcelableExtra(HomeActivity.DESTINATION);
+		return new LatLng(dest.getLatitude(), dest.getLongitude());
+	}
 
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.
 		getMenuInflater().inflate(R.menu.home, menu);
-//		Intent intent = getIntent();
-//		String message = intent.getStringExtra(HomeActivity.EXTRA_MESSAGE);
-//		
         /* Use the LocationManager class to obtain GPS locations */
         LocationManager mlocManager = (LocationManager) 
                 getSystemService(Context.LOCATION_SERVICE);
@@ -120,11 +137,6 @@ public class MainActivity extends Activity {
         criteria.setPowerRequirement(Criteria.POWER_LOW);   
         String locationProvider = mlocManager.getBestProvider(criteria, true);
         mlocManager.requestLocationUpdates(locationProvider, 0, 0, mlocListener);
-//		TextView textView = new TextView(this);
-//		textView.setTextSize(40);
-//		textView.setText(message);
-		
-		//setContentView(textView);
 		return true;
 	}
 
