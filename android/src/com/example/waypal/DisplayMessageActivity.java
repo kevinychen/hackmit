@@ -28,12 +28,15 @@ public class DisplayMessageActivity extends Activity {
 			getFragmentManager().beginTransaction()
 					.add(R.id.container, new PlaceholderFragment()).commit();
 		}
-		/*
 		// Get ListView object from xml
-        listView = (ListView) findViewById(R.id.list);
-        
+        listView = (ListView) findViewById(R.id.wayPointsList);
+        TextView hello = (TextView) findViewById(R.id.textView1);
+        View map = (View) findViewById(R.id.map);
+        System.out.println(hello);
+        System.out.println(listView);
+        System.out.println(map);
         // Defined Array values to show in ListView
-        String[] values = new String[] { "Android List View", 
+        String[] wayPoints = new String[] { "Android List View", 
                                          "Adapter implementation",
                                          "Simple List View In Android",
                                          "Create List View Android", 
@@ -44,12 +47,12 @@ public class DisplayMessageActivity extends Activity {
                                         };
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this,
-          R.layout.fragment_display_message, android.R.id.list, values);
+         android.R.layout.simple_list_item_1, android.R.id.text1, wayPoints);
 
 
         // Assign adapter to ListView
-        listView.setAdapter(adapter); 
-        
+        //listView.setAdapter(adapter); 
+        /*
         // ListView Item Click Listener
         listView.setOnItemClickListener(new OnItemClickListener() {
 
@@ -70,8 +73,7 @@ public class DisplayMessageActivity extends Activity {
              
               }
 
-         }); 
-         */
+         });*/
 	}
 
 	@Override
