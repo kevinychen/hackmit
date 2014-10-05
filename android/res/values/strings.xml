@@ -10,7 +10,7 @@
     <string name="destination">Where to?</string>
     <string name="button_send">Go Explore!</string>
     <string name="text1">Click me!</string>
-    <string name="title_activity_display_message">DisplayMessageActivity</string>
+    <string name="title_activity_main">Main</string>
     
 
 </resources>
