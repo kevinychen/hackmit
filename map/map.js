@@ -40,8 +40,8 @@ fb.child('trip1').child('waypoints').on('value', function(data) {
   waypoints = [];
   for (var key in waypointsObj) {
     var waypoint = waypointsObj[key];
-    var latlng = new google.maps.LatLng(waypoint.location.lat,
-      waypoint.location.lng);
+    var latlng = new google.maps.LatLng(waypoint.lat,
+      waypoint.lng);
     waypoints.push({
       location: latlng.toUrlValue(),
       stopover: true

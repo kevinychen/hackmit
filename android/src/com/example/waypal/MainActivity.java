@@ -14,8 +14,12 @@ import java.util.TimerTask;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.json.JSONTokener;
 
@@ -28,6 +32,7 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -46,6 +51,7 @@ import com.firebase.client.ValueEventListener;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 public class MainActivity extends FragmentActivity {
 
@@ -69,6 +75,9 @@ public class MainActivity extends FragmentActivity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+		StrictMode.ThreadPolicy policy = new StrictMode.
+				ThreadPolicy.Builder().permitAll().build();
+				StrictMode.setThreadPolicy(policy); 
 		setContentView(R.layout.activity_main);
 		if (savedInstanceState == null) {
 			mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
@@ -238,19 +247,109 @@ public class MainActivity extends FragmentActivity {
 		return new LatLng(dest.getLatitude(), dest.getLongitude());
 	}
 	
+//	public void computeRoute(List<Waypoint> waypoints) {
+//		Document doc = md.getDocument(start, dest, waypoints);
+//		ArrayList<LatLng> directionPoint = md.getDirection(doc);
+//        PolylineOptions rectLine = new PolylineOptions().width(3).color(
+//                Color.RED);
+//
+//        for (int i = 0; i < directionPoint.size(); i++) {
+//            rectLine.add(directionPoint.get(i));
+//        }
+//        Polyline polylin = map.addPolyline(rectLine);
+//	}
+	
 	public void computeRoute(List<Waypoint> waypoints) {
 		HttpClient httpClient = new DefaultHttpClient();
 		String url = "http://maps.googleapis.com/maps/api/directions/json?origin="
 				+ start.latitude + "," + start.longitude + "&destination=" + dest.latitude
-				+ dest.longitude;
-		if (waypoints != null && waypoints.size() > 0) {
+				+ "," + dest.longitude;
+		if (waypoints != null && waypoints.size() > 2) {
 		    url += "&waypoints=";
 		    int i = 0;
-		    for (i = 0; i < waypoints.size() - 1; i++)
-		    	url += waypoints.get(i).lat + "," + waypoints.get(i).lng + "|";
-		    url += waypoints.get(i).lat + "," + waypoints.get(i).lng;
+		    for (i = 1; i < waypoints.size() - 2; i++)
+		    	url += waypoints.get(i).lat + "," + waypoints.get(i).lng + "%7C";
+		    url += waypoints.get(i - 1).lat + "," + waypoints.get(i - 1).lng;
 		}
-		System.out.println(url);
+//		Toast.makeText(this, url, Toast.LENGTH_LONG).show();
+//		System.out.println(url);
+		try {
+			HttpContext localContext = new BasicHttpContext();
+			HttpPost httpPost = new HttpPost(url);
+			HttpResponse response = httpClient.execute(httpPost, localContext);
+			BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
+			StringBuilder builder = new StringBuilder();
+			for (String line = null; (line = reader.readLine()) != null;) {
+			    builder.append(line).append("\n");
+			}
+			JSONTokener tokener = new JSONTokener(builder.toString());
+			JSONObject finalResult = new JSONObject(tokener);
+//			System.out.println(finalResult);
+			JSONArray routes = finalResult.getJSONArray("routes");
+			if (routes.length() < 1) {
+				Toast.makeText(this, "No route found.", Toast.LENGTH_SHORT).show();
+				return;
+			}
+//			Toast.makeText(this, "SUCCESS", Toast.LENGTH_SHORT).show();
+			
+			PolylineOptions polyline = new PolylineOptions();
+			JSONObject route = routes.getJSONObject(0);
+			JSONArray legs = route.getJSONArray("legs");
+			for (int i = 0; i < legs.length(); i++) {
+				JSONArray steps = legs.getJSONObject(i).getJSONArray("steps");
+				for (int j = 0; j < steps.length(); j++) {
+					JSONObject start = steps.getJSONObject(j).getJSONObject("start_location");
+					polyline.add(parseLatLng(start));
+				}
+			}
+//			System.out.println(polyline);
+			map.addPolyline(polyline.geodesic(true));
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private LatLng parseLatLng(JSONObject obj) {
+	    try {
+			return new LatLng(obj.getDouble("lat"), obj.getDouble("lng"));
+		} catch (JSONException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	private List<LatLng> decodePoly(String encoded) {
+
+		List<LatLng> poly = new ArrayList<LatLng>();
+		int index = 0, len = encoded.length();
+		int lat = 0, lng = 0;
+
+		while (index < len) {
+			int b, shift = 0, result = 0;
+			do {
+				b = encoded.charAt(index++) - 63;
+				result |= (b & 0x1f) << shift;
+				shift += 5;
+			} while (b >= 0x20);
+			int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+			lat += dlat;
+
+			shift = 0;
+			result = 0;
+			do {
+				b = encoded.charAt(index++) - 63;
+				result |= (b & 0x1f) << shift;
+				shift += 5;
+			} while (b >= 0x20);
+			int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+			lng += dlng;
+
+			LatLng p = new LatLng((int) (((double) lat / 1E5) * 1E6),
+				 (int) (((double) lng / 1E5) * 1E6));
+			poly.add(p);
+		}
+
+		return poly;
 	}
 
 	@Override
@@ -318,6 +417,7 @@ public class MainActivity extends FragmentActivity {
             double latitude = location.getLatitude();
             double longitude = location.getLongitude();
             String Text = latitude + " " + longitude;
+//            Toast.makeText(m_context, Text, Toast.LENGTH_SHORT).show();
         }
 
         @Override
