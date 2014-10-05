@@ -41,9 +41,8 @@ public class POIFragment extends ListFragment {
 		View rootView = super.onCreateView(inflater, container, savedInstanceState);
 		viewCreated = true;
 		
-		
-		setListItems(new String[]{"testing", "testing123"});
 
+		
 		return rootView;
 	}
 	
@@ -75,7 +74,7 @@ public class POIFragment extends ListFragment {
 			return;
 		}
 		System.out.println("position: " + position);
-		removeItem(position);
+//		removeItem(position);
 	}
 	
 	public void removeItem(int i) {

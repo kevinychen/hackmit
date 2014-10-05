@@ -133,6 +133,30 @@ public class MainActivity extends FragmentActivity {
         
         speaker = new Speaker();
         speaker.start();
+        
+		ListView thisView = poiFragment.getListView();
+
+        // Create a ListView-specific touch listener. ListViews are given special treatment because
+        // by default they handle touches for their list items... i.e. they're in charge of drawing
+        // the pressed state (the list selector), handling list item clicks, etc.
+        SwipeDismissListViewTouchListener touchListener =
+                new SwipeDismissListViewTouchListener(
+                        thisView,
+                        new SwipeDismissListViewTouchListener.DismissCallbacks() {
+                            @Override
+                            public boolean canDismiss(int position) {
+                                return true;
+                            }
+
+                            @Override
+                            public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+                                for (int position : reverseSortedPositions) {
+                                    poiFragment.removeItem(position);
+                                }
+                            }
+                        });
+        thisView.setOnTouchListener(touchListener);
+        thisView.setOnScrollListener(touchListener.makeScrollListener());
 	}
 	
 	private void initializeWaypoints() {
